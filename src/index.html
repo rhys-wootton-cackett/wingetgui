@@ -123,27 +123,41 @@
         </div>
     </div>
     <div id="divAppsList" class="container pt-5">
-        <div class="card m-1" id="cardApp1" data-aos="fade-up" data-aos-duration="600">
+        <div class="card m-1" id="cardApp0" data-aos="fade-up" data-aos-duration="600">
             <div class="card-body">
                 <div class="row">
                     <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                        <h4 class="card-title" id="appName1">Chrome Beta</h4>
-                        <h6 class="text-muted card-subtitle mb-2" id="appVersionAuthor1">v84.0.4147.30 | Google</h6>
-                        <p class="card-text" id="appDescription1">A fast, secure, and free web browser built for the modern web. Chrome syncs bookmarks across all your devices.</p>
+                        <h4 class="card-title" id="appName0"></h4>
+                        <h6 class="text-muted card-subtitle mb-2" id="appVersionAuthor0"></h6>
+                        <p class="card-text" id="appDescription0"></p>
                     </div>
                     <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                        <button type="button" id="learnApp1" class="btn btn-light btn-block"><i class="fas fa-info-circle mr-2"></i>Learn more</button>
-                        <button type="button" id="installApp1" class="btn btn-light btn-block"><i class="fas fa-download mr-2"></i>Install App</button>
+                        <a href="#" target="_blank" id="learnApp0" class="btn btn-light btn-block"><i class="fas fa-info-circle mr-2"></i></button>
+                        <button type="button" id="installApp0" class="btn btn-light btn-block"><i class="fas fa-download mr-2"></i></button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <footer>
+        <div class="container">
+            <p class="d-flex justify-content-center ml-2 mr-2" id="footerInfoText"></p>
+        </div>
+    </footer>
+    <script>
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.1.1/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.3.1/js/swiper.jquery.min.js"></script>
-    <script src="assets/js/script.js"></script>
+    <script type="module" src="assets/js/script.js"></script>
+    <script>
+        if (window.module) module = window.module;
+    </script>
 </body>
 
 </html>
