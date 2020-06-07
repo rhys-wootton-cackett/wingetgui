@@ -66,8 +66,9 @@
                 <div class="col-10 col-md-10 col-lg-10 col-xl-10">
                     <h1 data-aos="fade" data-aos-duration="2000">Install Windows apps using the Windows Package Manager without typing a single command.</h1>
                     <div class="input-group pt-4" data-aos="fade" data-aos-duration="2000">
-                        <div class="input-group-prepend"><span class="input-group-text" id="searchAppsPrepend"><i class="fa fa-search"></i></span></div><input class="border rounded form-control" type="text" id="searchApps" placeholder="Search for apps">
-                        <div class="input-group-append"></div>
+                        <div class="input-group-prepend"><span class="input-group-text" id="searchAppsPrepend"><i class="fa fa-search fa-spin pause-spinner"></i></span></div>
+                        <input class="border rounded form-control" type="text" id="searchApps" placeholder="Search for apps">
+                        <div class="input-group-append"><button class="btn btn-primary ml-2" id="searchButton">Search</button></div>
                     </div>
                 </div>
                 <div class="col-2 col-md-2 col-lg-2 col-xl-2">
@@ -123,17 +124,18 @@
         </div>
     </div>
     <div id="divAppsList" class="container pt-5">
-        <div class="card m-1" id="cardApp0" data-aos="fade-up" data-aos-duration="600">
+        <div class="card m-1" id="cardApp0">
             <div class="card-body">
                 <div class="row">
                     <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
                         <h4 class="card-title" id="appName0"></h4>
                         <h6 class="text-muted card-subtitle mb-2" id="appVersionAuthor0"></h6>
                         <p class="card-text" id="appDescription0"></p>
+                        <p id="#appTags0"></p>
                     </div>
                     <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                        <a href="#" target="_blank" id="learnApp0" class="btn btn-light btn-block"><i class="fas fa-info-circle mr-2"></i></button>
-                        <button type="button" id="installApp0" class="btn btn-light btn-block"><i class="fas fa-download mr-2"></i></button>
+                        <a href="#" target="_blank" id="learnApp0" class="btn btn-light btn-block"><i class="fas fa-info-circle mr-2"></i>Learn more</a>
+                        <button type="button" id="installApp0" class="btn btn-light btn-block"><i class="fas fa-download mr-2"></i>Install app</button>
                     </div>
                 </div>
             </div>

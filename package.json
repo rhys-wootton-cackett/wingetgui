@@ -45,7 +45,13 @@
     }
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "axios": "^0.19.2",
+    "bluebird": "^3.7.2",
+    "electron-squirrel-startup": "^1.0.0",
+    "iconv-lite": "^0.5.1",
+    "js-yaml": "^3.14.0",
+    "node-cmd": "^3.0.0",
+    "sweetalert2": "^9.14.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "6.0.0-beta.51",

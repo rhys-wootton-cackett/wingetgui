@@ -159,8 +159,13 @@ modal-header.fa {
 
 .nav-link.bg-light.border.rounded.border-light,
 button,
+a[id^="learnApp"],
 label {
     border-radius: 20px!important
+}
+
+p[id^="appTags"] {
+    visibility: hidden;
 }
 
 #carousel-1.right.carousel-control,
@@ -186,10 +191,6 @@ label {
 
 #labelInstallLocation {
     border-radius: 20px 5px 5px 20px!important
-}
-
-body {
-    height: calc(100% - 25px)
 }
 
 footer {
@@ -553,6 +554,10 @@ fieldset legend+* {
 .toggle input:focus+label {
     outline: #ccc dotted 1px;
     outline-offset: .45rem
+}
+
+.pause-spinner {
+    animation-play-state: paused;
 }
 
 @media (max-width:800px) {

@@ -2,7 +2,10 @@ const cmd = require('node-cmd')
 const Swal = require('sweetalert2')
 const Prom = require('bluebird')
 const Axios = require('axios')
-const fs = require('fs');
+const yaml = require('js-yaml')
+const iconvlite = require('iconv-lite')
+const fs = require('fs')
+const fsp = require('fs').promises;
 const path = require('path')
 const { ipcRenderer } = require('electron')
 const UserHome = require('os').homedir()
@@ -14,21 +17,6 @@ const manifestArray = new Array();
 // ON LOAD
 $(document).ready((async function() {
     await checkRequiredToolsInstalled()
-
-    // TEST FUNCTION
-    for (var i = 1; i <= 10; i++) {
-        // Clone the card and append it to the apps list
-        var newCard = $('#cardApp' + i).clone()
-        $(newCard).appendTo('#divAppsList')
-
-        // Increment all of its id's by one
-        $(newCard).attr('id', 'cardApp' + (i + 1))
-        $(newCard).find('#appName' + i).attr('id', 'appName' + (i + 1))
-        $(newCard).find('#appVersionAuthor' + i).attr('id', 'appVersionAuthor' + (i + 1))
-        $(newCard).find('#appDescription' + i).attr('id', 'appDescription' + (i + 1))
-        $(newCard).find('#learnApp' + i).attr('id', 'learnApp' + (i + 1))
-        $(newCard).find('#installApp' + i).attr('id', 'installApp' + (i + 1))
-    }
 }));
 
 // BOOTSTRAP VISUAL CALLS
@@ -42,6 +30,23 @@ $(document).ready((function() {
         cycle: !0
     })
 }));
+
+// BUTTON HANDLING
+$(document).ready(() => {
+    $('#searchButton').click(() => {
+        // Spin the search icon to show it is searching
+        $('#searchAppsPrepend > i').removeClass('pause-spinner')
+
+        // For each card, search through and hide if it doesn't apply
+        $('.card').each((index, card) => {
+            if (!$(card).text().toLowerCase().includes($('#searchApps').val().toLowerCase())) $(card).hide()
+            else $(card).show()
+        })
+
+        // Stop spinning when done
+        $('#searchAppsPrepend > i').addClass('pause-spinner')
+    })
+})
 
 // MAIN FUNCTIONS
 
@@ -190,7 +195,7 @@ function cloneManifestRepository() {
         })
     } else {
         // Update the existing repository
-        getCmdAsync('git fetch "' + UserHome + '\\wingetGUI\\winget-pkgs" --allow-unrelated-histories').catch(err => {
+        getCmdAsync('git fetch "' + UserHome + '\\wingetGUI\\winget-pkgs"').catch(err => {
             if (err && !err.message.includes('CRLF')) {
                 console.log(err)
                 Swal.fire({
@@ -216,29 +221,45 @@ function populateAppList() {
     var dir = UserHome + '\\wingetGUI\\winget-pkgs\\manifests'
     traverseDir(dir)
 
-    manifestArray.forEach(file, i => {
-        fs.readFile(file, (err, data) => {
-            if (err) throw err;
-            let app = JSON.parse(data);
+    // Start adding the app cards
+    addNewAppCard(0)
+}
+
+function addNewAppCard(index) {
+    // For some reason these YAMLs have different encodings, so remove null characters if needed
+    fsp.readFile(manifestArray[index], 'utf8').then(data => {
+        $('#footerInfoText').text('Adding app ' + (index + 1) + ' of ' + manifestArray.length)
+        data = data.replace(/\0/g, '')
+
+        try {
+            var app = yaml.safeLoad(data)
 
             //Add data to relevent card
-            $('#appName' + i).text(app.Name)
-            $('#appVersionAuthor' + i).text(app.Version + ' | ' + app.Author)
-            $('#appDescription' + i).text(app.Description)
-            $('#learnApp' + i).attr('href', app.Homepage)
+            $('#appName' + index).text(app.Name)
+            $('#appVersionAuthor' + index).text(app.Version + ' | ' + app.Publisher)
+            $('#appDescription' + index).text(app.Description)
+            $('#learnApp' + index).attr('href', app.Homepage)
+            $('#appTags' + index).text(app.Tags)
 
             // Clone a new app card and add it to the list, relate it to the array number
-            var newCard = $('#cardApp' + i).clone()
+            var newCard = $('#cardApp' + index).clone()
             $(newCard).appendTo('#divAppsList')
 
             // Increment all of its id's by one
-            $(newCard).attr('id', 'cardApp' + (i + 1))
-            $(newCard).find('#appName' + i).attr('id', 'appName' + (i + 1))
-            $(newCard).find('#appVersionAuthor' + i).attr('id', 'appVersionAuthor' + (i + 1))
-            $(newCard).find('#appDescription' + i).attr('id', 'appDescription' + (i + 1))
-            $(newCard).find('#learnApp' + i).attr('id', 'learnApp' + (i + 1))
-            $(newCard).find('#installApp' + i).attr('id', 'installApp' + (i + 1))
-        });
+            $(newCard).attr('id', 'cardApp' + (index + 1))
+            $(newCard).find('#appName' + index).attr('id', 'appName' + (index + 1)).text('')
+            $(newCard).find('#appVersionAuthor' + index).attr('id', 'appVersionAuthor' + (index + 1)).text('')
+            $(newCard).find('#appDescription' + index).attr('id', 'appDescription' + (index + 1)).text('')
+            $(newCard).find('#learnApp' + index).attr('id', 'learnApp' + (index + 1))
+            $(newCard).find('#installApp' + index).attr('id', 'installApp' + (index + 1))
+            $(newCard).find('#appTags' + index).attr('id', 'appTags' + (index + 1)).text('')
+        } catch (e) {
+            // That YAML just won't budge, so skip it. 
+        }
+
+        // Recurse if we can
+        if (index + 1 < manifestArray.length) addNewAppCard(index + 1)
+        else $('#footerInfoText').text('')
     })
 }
 
@@ -250,5 +271,5 @@ function traverseDir(dir) {
         } else {
             manifestArray.push(fullPath)
         }
-    });
+    })
 }
