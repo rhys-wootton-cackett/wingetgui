@@ -62,7 +62,7 @@
     </nav>
     <div class="pt-5">
         <div class="container">
-            <div class="row">
+            <div class="row pb-3">
                 <div class="col-10 col-md-10 col-lg-10 col-xl-10">
                     <h1 data-aos="fade" data-aos-duration="2000">Install Windows apps using the Windows Package Manager without typing a single command.</h1>
                     <div class="input-group pt-4" data-aos="fade" data-aos-duration="2000">
@@ -121,26 +121,28 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div id="divAppsList" class="container pt-5">
-        <div class="card m-1" id="cardApp1">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                        <h4 class="card-title" id="appName1"></h4>
-                        <h6 class="text-muted card-subtitle mb-2" id="appVersionAuthor1"></h6>
-                        <p class="card-text" id="appDescription1"></p>
-                        <p id="#appTags0"></p>
-                    </div>
-                    <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
-                        <a href="#" target="_blank" id="learnApp1" class="btn btn-light btn-block mb-2"><i class="fas fa-info-circle mr-2"></i>Learn more</a>
-                        <div class="btn-group btn-block">
-                            <button type="button" id="installApp" class="btn btn-light btn-block mr-2"><i class="fas fa-download mr-2"></i>Install</button>
-                            <button type="button" id="installAppVersionHistory1" class="btn btn-light float-right dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
-                                <span class="sr-only">Older versions</span>
-                            </button>
-                            <div class="dropdown-menu" id="dropdownOlderVersions1">
+            <div class="row">
+                <div id="divAppsList">
+                    <div class="card m-1" id="cardApp1">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                                    <h4 class="card-title" id="appName1"></h4>
+                                    <h6 class="text-muted card-subtitle mb-2" id="appVersionAuthor1"></h6>
+                                    <p class="card-text" id="appDescription1"></p>
+                                    <p id="#appTags0"></p>
+                                </div>
+                                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
+                                    <a href="#" target="_blank" id="learnApp1" class="btn btn-light btn-block mb-2"><i class="fas fa-info-circle mr-2"></i>Learn more</a>
+                                    <div class="btn-group btn-block">
+                                        <button type="button" id="installApp" class="btn btn-light btn-block mr-2"><i class="fas fa-download mr-2"></i>Install</button>
+                                        <button type="button" id="installAppVersionHistory1" class="btn btn-light float-right dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+                                            <span class="sr-only">Older versions</span>
+                                        </button>
+                                        <div class="dropdown-menu" id="dropdownOlderVersions1">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -3,6 +3,7 @@ const Swal = require('sweetalert2')
 const Prom = require('bluebird')
 const Axios = require('axios')
 const yaml = require('js-yaml')
+const compareVersions = require('compare-versions')
 const fs = require('fs')
 const fsp = require('fs').promises;
 const path = require('path')
@@ -102,6 +103,10 @@ async function checkRequiredToolsInstalled() {
     }
 }
 
+/**
+ * Installs Git for Windows to a user's system if it isn't already installed
+ * @param {boolean} installWinGetAfter 
+ */
 function installGit(installWinGetAfter) {
     return new Promise(resolve => {
         Axios.get('https://api.github.com/repos/git-for-windows/git/releases/latest')
@@ -139,6 +144,9 @@ function installGit(installWinGetAfter) {
     })
 }
 
+/**
+ * Installs WinGet on a users system if it is not already installed
+ */
 function installWinGet() {
     return new Promise(resolve => {
         Axios.get('https://api.github.com/repos/microsoft/winget-cli/releases/latest')
@@ -170,6 +178,9 @@ function installWinGet() {
     })
 }
 
+/**
+ * Uses Git to grab the most recent commit from Microsoft's package repository 
+ */
 function cloneManifestRepository() {
     $('#footerInfoText').text('Grabbing most recent manifests for WinGet')
 
@@ -223,65 +234,88 @@ function populateAppList() {
     traverseDir(dir)
 
     // Start adding the app cards
-    addNewAppCard(0)
+    addNewApp(0)
 }
 
-function addNewAppCard(index) {
+/**
+ * Adds a new app to the list of all apps.
+ * @param {*} index 
+ */
+function addNewApp(index) {
     // For some reason these YAMLs have different encodings, so remove null characters if needed
     fsp.readFile(manifestArray[index], 'utf8').then(data => {
         $('#footerInfoText').text('Adding app ' + (index + 1) + ' of ' + manifestArray.length)
         data = data.replace(/\0/g, '')
+        var app, path1, path2, currVer;
 
         try {
-            var app = yaml.safeLoad(data)
-
-            // Check that this is an older version of the app, and if so, add to old list, else clone a new card
-            if (index !== 0) {
-                var path1 = require('path').dirname(manifestArray[index])
-                var path2 = require('path').dirname(manifestArray[index - 1])
-                if (path1 === path2) {
-                    var oldVer = $('#appVersionAuthor' + appCardCount).text().replace(/\|.*$/, '').trim()
-                    $('#dropdownOlderVersions' + appCardCount).append(`<a class="dropdown-item">${oldVer}</a>`)
-                    $('#installAppVersionHistory' + appCardCount).prop('disabled', false)
-                } else {
-                    // Clone a new app card and add it to the list, relate it to the unique app count
-                    appCardCount++
-                    var newCard = $('#cardApp' + (appCardCount - 1)).clone()
-                    $(newCard).appendTo('#divAppsList')
-
-                    // Increment all of its id's by one
-                    $(newCard).attr('id', 'cardApp' + appCardCount)
-                    $(newCard).find('#appName' + (appCardCount - 1)).attr('id', 'appName' + (appCardCount)).text('')
-                    $(newCard).find('#appVersionAuthor' + (appCardCount - 1)).attr('id', 'appVersionAuthor' + (appCardCount)).text('')
-                    $(newCard).find('#appDescription' + (appCardCount - 1)).attr('id', 'appDescription' + (appCardCount)).text('')
-                    $(newCard).find('#learnApp' + (appCardCount - 1)).attr('id', 'learnApp' + (appCardCount))
-                    $(newCard).find('#appTags' + (appCardCount - 1)).attr('id', 'appTags' + (appCardCount)).text('')
-                    $(newCard).find('#installAppVersionHistory' + (appCardCount - 1)).attr('id', 'installAppVersionHistory' + (appCardCount)).text('').prop('disabled', true)
-                    $(newCard).find('#dropdownOlderVersions' + (appCardCount - 1)).attr('id', 'dropdownOlderVersions' + (appCardCount)).text('')
-                }
-            }
-
-            //Add data to relevent card
-            $('#appName' + appCardCount).text(app.Name)
-            $('#appVersionAuthor' + appCardCount).text(app.Version + ' | ' + app.Publisher)
-            $('#appDescription' + appCardCount).text(app.Description)
-            $('#learnApp' + appCardCount).attr('href', app.Homepage)
-            $('#appTags' + appCardCount).text(app.Tags)
-
-            // Return if no more apps
-            if (index === manifestArray.length) return;
+            app = yaml.safeLoad(data)
         } catch (e) {
             // Remove it from the array and reduce index back to that value
             manifestArray.splice(index, 1)
             index--
+
+            // Recurse if we can
+            if (index + 1 < manifestArray.length) addNewApp(index + 1)
+            else $('#footerInfoText').text('')
         }
 
+        if (index !== 0) {
+            path1 = require('path').dirname(manifestArray[index])
+            path2 = require('path').dirname(manifestArray[index - 1])
+            currVer = $('#appVersionAuthor' + appCardCount).text().replace(/\|.*$/, '').trim()
+
+            // Check if paths are not equal, or if one version doesn't meet semver standards. If not, just create a new app card
+            if (path1 !== path2 || !compareVersions.validate(app.Version) || !compareVersions.validate(currVer)) {
+                // Clone a new app card and add it to the list, relate it to the unique app count
+                appCardCount++
+                var newCard = $('#cardApp' + (appCardCount - 1)).clone()
+                $(newCard).appendTo('#divAppsList')
+
+                // Increment all of its id's by one
+                $(newCard).attr('id', 'cardApp' + appCardCount)
+                $(newCard).find('#appName' + (appCardCount - 1)).attr('id', 'appName' + (appCardCount)).text('')
+                $(newCard).find('#appVersionAuthor' + (appCardCount - 1)).attr('id', 'appVersionAuthor' + (appCardCount)).text('')
+                $(newCard).find('#appDescription' + (appCardCount - 1)).attr('id', 'appDescription' + (appCardCount)).text('')
+                $(newCard).find('#learnApp' + (appCardCount - 1)).attr('id', 'learnApp' + (appCardCount))
+                $(newCard).find('#appTags' + (appCardCount - 1)).attr('id', 'appTags' + (appCardCount)).text('')
+                $(newCard).find('#installAppVersionHistory' + (appCardCount - 1)).attr('id', 'installAppVersionHistory' + (appCardCount)).text('').prop('disabled', true)
+                $(newCard).find('#dropdownOlderVersions' + (appCardCount - 1)).attr('id', 'dropdownOlderVersions' + (appCardCount)).text('')
+            } else {
+                if (compareVersions.compare(currVer, app.Version, '<')) {
+                    // Version is newer
+                    $('#dropdownOlderVersions' + appCardCount).append(`<a class="dropdown-item">${currVer}</a>`)
+                    $('#installAppVersionHistory' + appCardCount).prop('disabled', false)
+                } else if (path1 === path2 && compareVersions.compare(currVer, app.Version, '>')) {
+                    // Version is older so skip changing card information
+                    $('#dropdownOlderVersions' + appCardCount).append(`<a class="dropdown-item">${app.Version}</a>`)
+                    $('#installAppVersionHistory' + appCardCount).prop('disabled', false)
+
+                    if (index + 1 < manifestArray.length) {
+                        addNewApp(index + 1)
+                        return;
+                    } else $('#footerInfoText').text('')
+                }
+            }
+        }
+
+        //Add data to relevent card
+        $('#appName' + appCardCount).text(app.Name)
+        $('#appVersionAuthor' + appCardCount).text(app.Version + ' | ' + app.Publisher)
+        $('#appDescription' + appCardCount).text(app.Description)
+        $('#learnApp' + appCardCount).attr('href', app.Homepage)
+        $('#appTags' + appCardCount).text(app.Tags)
+
         // Recurse if we can
-        if (index + 1 < manifestArray.length) addNewAppCard(index + 1)
+        if (index + 1 < manifestArray.length) addNewApp(index + 1)
         else $('#footerInfoText').text('')
     })
 }
 
+/**
+ * Traverses the manifests folder and adds all files to the manifest array
+ * @param {*} dir 
+ */
 function traverseDir(dir) {
     fs.readdirSync(dir).forEach(file => {
         let fullPath = path.join(dir, file)
@@ -291,4 +325,8 @@ function traverseDir(dir) {
             manifestArray.push(fullPath)
         }
     })
+}
+
+function checkifProgramInstalled() {
+
 }

@@ -1,3 +1,22 @@
+::-webkit-scrollbar-thumb {
+    background: #444;
+}
+
+ ::-webkit-scrollbar-thumb:hover {
+    background: #000;
+}
+
+ ::-webkit-scrollbar {
+    width: 5px;
+    background-color: #FFF;
+}
+
+#divAppsList {
+    width: 100%;
+    height: calc(100vh - 87px - 215px - 50px);
+    overflow-y: auto
+}
+
 .header-dark {
     background: url(../../assets/img/mountain_bg.jpg) 0 0/cover #444;
     padding-bottom: 80px
