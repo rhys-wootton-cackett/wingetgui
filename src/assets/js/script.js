@@ -3,7 +3,6 @@ const Swal = require('sweetalert2')
 const Prom = require('bluebird')
 const Axios = require('axios')
 const yaml = require('js-yaml')
-const iconvlite = require('iconv-lite')
 const fs = require('fs')
 const fsp = require('fs').promises;
 const path = require('path')
@@ -13,6 +12,8 @@ import download from './downloader.js'
 import sleep from './sleep.js'
 const getCmdAsync = Prom.promisify(cmd.get, { multiArgs: true, context: cmd })
 const manifestArray = new Array();
+
+var appCardCount = 1;
 
 // ON LOAD
 $(document).ready((async function() {
@@ -195,7 +196,7 @@ function cloneManifestRepository() {
         })
     } else {
         // Update the existing repository
-        getCmdAsync('git fetch "' + UserHome + '\\wingetGUI\\winget-pkgs"').catch(err => {
+        getCmdAsync('git -C "' + UserHome + '\\wingetGUI\\winget-pkgs" pull --allow-unrelated-histories').catch(err => {
             if (err && !err.message.includes('CRLF')) {
                 console.log(err)
                 Swal.fire({
@@ -234,27 +235,45 @@ function addNewAppCard(index) {
         try {
             var app = yaml.safeLoad(data)
 
+            // Check that this is an older version of the app, and if so, add to old list, else clone a new card
+            if (index !== 0) {
+                var path1 = require('path').dirname(manifestArray[index])
+                var path2 = require('path').dirname(manifestArray[index - 1])
+                if (path1 === path2) {
+                    var oldVer = $('#appVersionAuthor' + appCardCount).text().replace(/\|.*$/, '').trim()
+                    $('#dropdownOlderVersions' + appCardCount).append(`<a class="dropdown-item">${oldVer}</a>`)
+                    $('#installAppVersionHistory' + appCardCount).prop('disabled', false)
+                } else {
+                    // Clone a new app card and add it to the list, relate it to the unique app count
+                    appCardCount++
+                    var newCard = $('#cardApp' + (appCardCount - 1)).clone()
+                    $(newCard).appendTo('#divAppsList')
+
+                    // Increment all of its id's by one
+                    $(newCard).attr('id', 'cardApp' + appCardCount)
+                    $(newCard).find('#appName' + (appCardCount - 1)).attr('id', 'appName' + (appCardCount)).text('')
+                    $(newCard).find('#appVersionAuthor' + (appCardCount - 1)).attr('id', 'appVersionAuthor' + (appCardCount)).text('')
+                    $(newCard).find('#appDescription' + (appCardCount - 1)).attr('id', 'appDescription' + (appCardCount)).text('')
+                    $(newCard).find('#learnApp' + (appCardCount - 1)).attr('id', 'learnApp' + (appCardCount))
+                    $(newCard).find('#appTags' + (appCardCount - 1)).attr('id', 'appTags' + (appCardCount)).text('')
+                    $(newCard).find('#installAppVersionHistory' + (appCardCount - 1)).attr('id', 'installAppVersionHistory' + (appCardCount)).text('').prop('disabled', true)
+                    $(newCard).find('#dropdownOlderVersions' + (appCardCount - 1)).attr('id', 'dropdownOlderVersions' + (appCardCount)).text('')
+                }
+            }
+
             //Add data to relevent card
-            $('#appName' + index).text(app.Name)
-            $('#appVersionAuthor' + index).text(app.Version + ' | ' + app.Publisher)
-            $('#appDescription' + index).text(app.Description)
-            $('#learnApp' + index).attr('href', app.Homepage)
-            $('#appTags' + index).text(app.Tags)
+            $('#appName' + appCardCount).text(app.Name)
+            $('#appVersionAuthor' + appCardCount).text(app.Version + ' | ' + app.Publisher)
+            $('#appDescription' + appCardCount).text(app.Description)
+            $('#learnApp' + appCardCount).attr('href', app.Homepage)
+            $('#appTags' + appCardCount).text(app.Tags)
 
-            // Clone a new app card and add it to the list, relate it to the array number
-            var newCard = $('#cardApp' + index).clone()
-            $(newCard).appendTo('#divAppsList')
-
-            // Increment all of its id's by one
-            $(newCard).attr('id', 'cardApp' + (index + 1))
-            $(newCard).find('#appName' + index).attr('id', 'appName' + (index + 1)).text('')
-            $(newCard).find('#appVersionAuthor' + index).attr('id', 'appVersionAuthor' + (index + 1)).text('')
-            $(newCard).find('#appDescription' + index).attr('id', 'appDescription' + (index + 1)).text('')
-            $(newCard).find('#learnApp' + index).attr('id', 'learnApp' + (index + 1))
-            $(newCard).find('#installApp' + index).attr('id', 'installApp' + (index + 1))
-            $(newCard).find('#appTags' + index).attr('id', 'appTags' + (index + 1)).text('')
+            // Return if no more apps
+            if (index === manifestArray.length) return;
         } catch (e) {
-            // That YAML just won't budge, so skip it. 
+            // Remove it from the array and reduce index back to that value
+            manifestArray.splice(index, 1)
+            index--
         }
 
         // Recurse if we can
