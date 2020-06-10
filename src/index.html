@@ -17,45 +17,11 @@
 </head>
 
 <body>
-    <div class="modal fade" role="dialog" tabindex="-1" id="modalSettings">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header mr-2">
-                    <h4 class="modal-title mr-2">Settings</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
-                <div class="modal-body">
-                    <div class="container">
-                        <form>
-                            <div class="form-row">
-                                <div class="col"><label class="d-block">What's your theme?</label>
-                                    <div class="btn-group btn-group-toggle" data-toggle="buttons"><label class="btn btn-light active">Daylight<input type="radio" name="options" checked=""></label><label class="btn btn-light ml-2">Midnight</label></div>
-                                </div>
-                                <div class="col"><label class="d-block d-xl-flex justify-content-xl-end">Installer type</label>
-                                    <div class="btn-group btn-group-toggle float-right" data-toggle="buttons"><label class="btn btn-light active">Interactive<input type="radio" name="options" checked=""></label><label class="btn btn-light ml-2">Silent</label></div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="col mt-4"><label class="d-block">Application install location</label>
-                                    <div class="input-group mb-3">
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="inputInstallLocation">
-                                            <label id="labelInstallLocation" class="custom-file-label" for="inputInstallLocation">Choose file</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="modal-footer"><button class="btn btn-success" type="button">Save</button></div>
-            </div>
-        </div>
-    </div>
     <nav class="navbar navbar-light navbar-expand-md navigation-clean">
         <div class="container"><a class="navbar-brand" href="#">wingetGUI</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" data-aos="fade-up" data-aos-duration="600" id="navcol-1">
                 <ul class="nav navbar-nav ml-auto">
-                    <li class="nav-item" role="presentation"><a class="nav-link bg-light border rounded border-light mr-2" href="#"><i class="fa fa-info-circle mr-2"></i>About</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link bg-light border rounded border-light" href="#modalSettings" data-toggle="modal" data-target="#modalSettings"><i class="fa fa-cog mr-2"></i>Settings</a></li>
+                    <li class="nav-item" role="presentation"><a id="navGitHub" class="nav-link bg-light border rounded border-light mr-2" href="https://github.com/rhys-wootton/wingetgui" target="_blank"><i class="fab fa-github mr-2"></i>Learn about wingetGUI</a></li>
                 </ul>
             </div>
         </div>
@@ -135,10 +101,8 @@
                                 <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2">
                                     <a href="#" target="_blank" id="learnApp1" class="btn btn-light btn-block mb-2"><i class="fas fa-info-circle mr-2"></i>Learn more</a>
                                     <div class="btn-group btn-block">
-                                        <button type="button" id="installApp" class="btn btn-light btn-block mr-2"><i class="fas fa-download mr-2"></i>Install</button>
-                                        <button type="button" id="installAppVersionHistory1" class="btn btn-light float-right dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
-                                            <span class="sr-only">Older versions</span>
-                                        </button>
+                                        <button type="button" id="installApp1" class="btn btn-light btn-block mr-2"><i class="fas fa-download mr-2"></i>Install</button>
+                                        <button type="button" id="installAppVersionHistory1" class="btn btn-light float-right dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled></button>
                                         <div class="dropdown-menu" id="dropdownOlderVersions1">
                                         </div>
                                     </div>

@@ -9,6 +9,7 @@ const fsp = require('fs').promises;
 const path = require('path')
 const { ipcRenderer } = require('electron')
 const UserHome = require('os').homedir()
+var child_process = require('child_process');
 import download from './downloader.js'
 import sleep from './sleep.js'
 const getCmdAsync = Prom.promisify(cmd.get, { multiArgs: true, context: cmd })
@@ -36,17 +37,24 @@ $(document).ready((function() {
 // BUTTON HANDLING
 $(document).ready(() => {
     $('#searchButton').click(() => {
-        // Spin the search icon to show it is searching
-        $('#searchAppsPrepend > i').removeClass('pause-spinner')
-
         // For each card, search through and hide if it doesn't apply
         $('.card').each((index, card) => {
             if (!$(card).text().toLowerCase().includes($('#searchApps').val().toLowerCase())) $(card).hide()
             else $(card).show()
         })
+    })
 
-        // Stop spinning when done
-        $('#searchAppsPrepend > i').addClass('pause-spinner')
+    $('[id^="installApp"').click((e) => {
+        //Ignore the dropdown button and undefined id's
+        if ($(e.target).attr('id') === undefined) return;
+        if ($(e.target).attr('id').includes('installAppVersionHistory')) return;
+
+        //Get the card app number, and grab atrributes needed for install
+        var appNumber = $(e.target).closest('[id^="cardApp"').attr('id').replace('cardApp', '')
+        var appName = $('#appName' + appNumber).text()
+        var appVer = $('#appVersionAuthor' + appNumber).text().replace(/\|.*$/, '').trim()
+
+        runWinGetCommand(true, appNumber, appName, appVer)
     })
 })
 
@@ -260,6 +268,9 @@ function addNewApp(index) {
             else $('#footerInfoText').text('')
         }
 
+        // Fix for version numbers that get their .0's removed 
+        // if (isFinite(app.Version) && !(app.Version.toString().includes('.'))) console.log(app.Version)
+
         if (index !== 0) {
             path1 = require('path').dirname(manifestArray[index])
             path2 = require('path').dirname(manifestArray[index - 1])
@@ -269,7 +280,7 @@ function addNewApp(index) {
             if (path1 !== path2 || !compareVersions.validate(app.Version) || !compareVersions.validate(currVer)) {
                 // Clone a new app card and add it to the list, relate it to the unique app count
                 appCardCount++
-                var newCard = $('#cardApp' + (appCardCount - 1)).clone()
+                var newCard = $('#cardApp' + (appCardCount - 1)).clone(true, true)
                 $(newCard).appendTo('#divAppsList')
 
                 // Increment all of its id's by one
@@ -279,12 +290,13 @@ function addNewApp(index) {
                 $(newCard).find('#appDescription' + (appCardCount - 1)).attr('id', 'appDescription' + (appCardCount)).text('')
                 $(newCard).find('#learnApp' + (appCardCount - 1)).attr('id', 'learnApp' + (appCardCount))
                 $(newCard).find('#appTags' + (appCardCount - 1)).attr('id', 'appTags' + (appCardCount)).text('')
+                $(newCard).find('#installApp' + (appCardCount - 1)).attr('id', 'installApp' + (appCardCount))
                 $(newCard).find('#installAppVersionHistory' + (appCardCount - 1)).attr('id', 'installAppVersionHistory' + (appCardCount)).text('').prop('disabled', true)
                 $(newCard).find('#dropdownOlderVersions' + (appCardCount - 1)).attr('id', 'dropdownOlderVersions' + (appCardCount)).text('')
             } else {
                 if (compareVersions.compare(currVer, app.Version, '<')) {
                     // Version is newer
-                    $('#dropdownOlderVersions' + appCardCount).append(`<a class="dropdown-item">${currVer}</a>`)
+                    $('#dropdownOlderVersions' + appCardCount).append(`<a id="dropdownOldVersion${appCardCount}" class="dropdown-item">${currVer}</a>`)
                     $('#installAppVersionHistory' + appCardCount).prop('disabled', false)
                 } else if (path1 === path2 && compareVersions.compare(currVer, app.Version, '>')) {
                     // Version is older so skip changing card information
@@ -327,6 +339,60 @@ function traverseDir(dir) {
     })
 }
 
-function checkifProgramInstalled() {
+/**
+ * Runs the WinGet command to install an app with it's name and version
+ * @param {*} latestVer
+ * @param {*} appNumber
+ * @param {*} appName 
+ * @param {*} appVer 
+ */
+function runWinGetCommand(latestVer, appNumber, appName, appVer) {
+    var command
 
+    if (latestVer) command = `winget install --name '${appName}' -e`
+    else command = `winget install --name '${appName}' -e --version ${appVer}`
+
+    // Change the text to an installing spinner
+    // $('#installApp' + appNumber).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Installing')
+    // getCmdAsync(command).then(() => {
+    //     //Say installed and disable install buttons for that app
+    //     $('#installApp' + appNumber).html('<i class="fas fa-hdd mr-2"></i>Installed').removeClass('btn-light').addClass('btn-success').prop('disabled', true)
+    //     $('#installAppVersionHistory' + appNumber).prop('disabled', true)
+    // }).catch((err) => {
+    //     console.log(err)
+    //         //Install failed somewhere, so tell the user
+    //     Swal.fire({
+    //         icon: 'error',
+    //         title: `${appName} install failed`,
+    //         text: 'For some reason the installation failed. Please try again. It it keeps happening, report it as an issue on GitHub.'
+    //     })
+    //     $('#installApp' + appNumber).html('<i class="fas fa-download mr-2"></i>Install')
+    // })
+
+    // Set button to say downloading, and disable the button, then run the installer
+    $('#installApp' + appNumber).html('<i class="fas fa-circle-notch fa-spin mr-1"></i>Downloading').prop('disabled', true)
+    $('#installAppVersionHistory' + appNumber).prop('disabled', true)
+
+    //Run the
+    var child = child_process.exec(`powershell -command "${command}"`)
+
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', function(data) {
+        if (data.includes('Installing')) $('#installApp' + appNumber).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Installing')
+    });
+
+    child.stderr.setEncoding('utf8');
+    child.stderr.on('data', function(data) {
+        Swal.fire({
+            icon: 'error',
+            title: `${appName} install failed`,
+            text: 'For some reason the installation failed. Please try again. It it keeps happening, report it as an issue on GitHub.'
+        })
+        $('#installApp' + appNumber).html('<i class="fas fa-download mr-2"></i>Install').prop('disabled', false)
+        $('#installAppVersionHistory' + appNumber).prop('disabled', false)
+    });
+
+    child.on('close', function(code) {
+        $('#installApp' + appNumber).html('<i class="fas fa-hdd mr-2"></i>Installed').removeClass('btn-light').addClass('btn-success')
+    });
 }
