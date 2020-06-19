@@ -336,6 +336,11 @@ function traverseDir(dir) {
     })
 }
 
+/**
+ * Gets an applications information before sending it to the installer function
+ * @param {*} latestVer 
+ * @param {*} e 
+ */
 function getAppInfoBeforeInstalling(latestVer, e) {
     //Get the card app number, and grab atrributes needed for install
     var appNumber = $(e).closest('[id^="cardApp"').attr('id').replace('cardApp', '')
@@ -356,7 +361,7 @@ function getAppInfoBeforeInstalling(latestVer, e) {
  * @param {*} appVer 
  */
 function runWinGetCommand(latestVer, appNumber, appName, appVer) {
-    var command
+    var command, commandOutput
 
     if (latestVer) command = `winget install --name '${appName}' -e`
     else command = `winget install --name '${appName}' -e --version ${appVer}`
@@ -370,7 +375,10 @@ function runWinGetCommand(latestVer, appNumber, appName, appVer) {
 
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', function(data) {
+        commandOutput += data
         if (data.includes('Installing')) $('#installApp' + appNumber).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Installing')
+
+        // Normal output can also display an error, so try to catch it
     });
 
     child.stderr.setEncoding('utf8');
@@ -384,7 +392,17 @@ function runWinGetCommand(latestVer, appNumber, appName, appVer) {
         $('#appVersionHistory' + appNumber).prop('disabled', false)
     });
 
-    child.on('close', function(code) {
-        $('#installApp' + appNumber).html('<i class="fas fa-hdd mr-2"></i>Installed').removeClass('btn-light').addClass('btn-success')
+    child.on('close', function() {
+        if (commandOutput.includes('failed')) {
+            Swal.fire({
+                icon: 'error',
+                title: `${appName} install failed`,
+                text: 'For some reason the installation failed. Please try again. It it keeps happening, report it as an issue on GitHub.'
+            })
+            $('#installApp' + appNumber).html('<i class="fas fa-download mr-2"></i>Install').prop('disabled', false)
+            $('#appVersionHistory' + appNumber).prop('disabled', false)
+        } else {
+            $('#installApp' + appNumber).html('<i class="fas fa-hdd mr-2"></i>Installed').removeClass('btn-light').addClass('btn-success')
+        }
     });
 }

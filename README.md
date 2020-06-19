@@ -17,9 +17,16 @@ Manifests are pulled from the repository using Git, and is stored in your user f
 ## Why is this currently so barebones?
 I am developing this concurrently with the releases of WinGet. Therefore, all the features related to WinGet will be implemented into wingetGUI. At the moment, WinGet is still in preview and is being actively developed on, so I can only do so much with what is being given to us. As they add more features, wingetGUI will also get them.
 
+## Current issues
+- The app only allows an install of an application once whilst it is running.
+- Currently installed apps are not shown as installed. This is dependent on WinGet adding a command to show currently installed programs.
+- Sometimes clicking on an install button will not initialse its install.
+
 ## Planned features
 - Adding app icons to each card if possible.
+- Displaying more information about an app, such as its license and tags
+- Find a way to show download progress (currently stdout only returns once the download is complete).
 - Dark mode so wingetGUI doesn't blind people.
-- Option for silent installs (dependent on the app being installed)
-- Option for install location (dependent on the app being installed)
+- Option for silent installs (dependent on the app being installed).
+- Option for install location (dependent on the app being installed).
 - Whatever WinGet's latest release has that this doesn't!
